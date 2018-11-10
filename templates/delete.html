@@ -1,0 +1,7 @@
+{{define "content"}}
+
+<h1>Delete issue "{{.Issue.Id}}"?</h1>
+<p>Are you sure you want to delete issue "{{.Issue.Id}}"?</p>
+<form method="post"><input type="submit" value="Delete" class="btn btn-danger" /> or <a href="/read/{{.Issue.Id}}/">cancel</a></form> 
+
+{{end}}

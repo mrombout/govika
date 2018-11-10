@@ -1,0 +1,30 @@
+{{ define "content" }}
+
+<h1>Issues</h1>
+
+<a class="create-issue btn btn-primary" href="/create/">New issue</a>
+
+<hr />
+
+{{range .Issues}}
+<div class="issue">
+  <div class="issue-main">
+    <div class="issue-main-title">
+        <a href="/read/{{.Id}}/">{{.Title}}</a><br />
+    </div>
+    <div class="issue-main-info">
+      <span class="issue-id">#298</span>
+      <span class="issue-author">by {{.Author}}</span>
+      <span class="issue-milestone">{{.Milestone}}</span>
+      {{range .Labels}}
+      <span class="issue-label label-{{.}}">{{.}}</span>
+      {{end}}
+    </div>
+  </div>
+  <div class="issue-comments-number">
+    <span><a href="/read/{{.Id}}/">{{len .Comments}} comments</a></span>
+  </div>
+</div>
+{{end}}
+
+{{end}}

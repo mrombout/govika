@@ -1,0 +1,42 @@
+{{define "content"}}
+
+<div class="read-issue">
+<a href="/" class="btn">Back</a> <a href="/update/{{.Issue.Id}}/" class="btn">Edit</a> <a href="/delete/{{.Issue.Id}}/" class="btn btn-danger">Delete</a>
+
+<h1>{{.Issue.Title}}</h1>
+<p>{{.Issue.Description}}</p>
+
+<hr />
+<h2>Comments</h2>
+<table style="width: 90%;">
+{{range .Issue.Comments}}
+    <tr>
+        <td>{{.Message}}</td>
+    </tr>
+    <tr>
+        <td>~ {{if .Author}}{{.Author}}{{else}}Anonymous{{end}}</td>
+    </tr>
+    <tr>
+        <td><hr /></td>
+    </tr>
+{{end}}
+</table>
+
+<hr />
+
+<form method="POST" action="/read/{{.Issue.Id}}/comment/">
+    <table>
+        <tr>
+            <th><label for="author">Author</label></th>
+            <td><input type="text" id="author" name="author" /></td>
+        </tr>
+        <tr>
+            <th><label for="message">Comment</label></th>
+            <td><textarea name="message" id="message"></textarea><br /></td>
+        </tr>
+    </table>
+    <input class="btn btn-primary" type="submit" value="Comment" />
+</form>
+</div>
+
+{{end}}

@@ -1,0 +1,28 @@
+{{define "content"}}
+
+<div class="create-issue">
+<h1>Create issue</h1>
+
+<form method="POST">
+    <a href="/" class="btn">Back</a>
+    <table>
+        <tbody>
+            <tr>
+                <th><label for="id">Id</label></th>
+                <td><input type="text" id="id" name="id" /></td>
+            </tr>
+            <tr>
+                <th><label for="title">Title</label></th>
+                <td><input type="text" id="title" name="title" /></td>
+            </tr>
+            <tr>
+                <th><label for="description">Description</label></th>
+                <td><textarea id="description" name="description"></textarea></td>
+            </tr>
+        </tbody>
+    </table>
+    <input type="submit" value="Create" class="btn btn-primary" /> or <a href="#">Cancel</a>
+</form>
+</div>
+
+{{end}}
