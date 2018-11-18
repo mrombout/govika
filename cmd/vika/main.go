@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 	"gopkg.in/yaml.v2"
 )
@@ -49,9 +50,10 @@ type DeleteViewModel struct {
 	Issue Issue
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("./templates/layout.html", "./templates/index.html"))
+var box packr.Box
 
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := loadTemplate(&box, "index.html")
 	viewModel := IndexViewModel{}
 
 	files, err := ioutil.ReadDir("./issues")
@@ -76,7 +78,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("./templates/layout.html", "./templates/create.html"))
+	tmpl := loadTemplate(&box, "create.html")
 	viewModel := CreateViewModel{}
 	tmpl.ExecuteTemplate(w, "layout", viewModel)
 }
@@ -97,8 +99,7 @@ func createPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func readHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("./templates/layout.html", "./templates/read.html"))
-
+	tmpl := loadTemplate(&box, "read.html")
 	viewModel := ReadViewModel{}
 
 	vars := mux.Vars(r)
@@ -146,8 +147,7 @@ func commentPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("./templates/layout.html", "./templates/update.html"))
-
+	tmpl := loadTemplate(&box, "update.html")
 	viewModel := UpdateViewModel{}
 
 	vars := mux.Vars(r)
@@ -184,8 +184,7 @@ func updatePostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("./templates/layout.html", "./templates/delete.html"))
-
+	tmpl := loadTemplate(&box, "delete.html")
 	viewModel := DeleteViewModel{}
 
 	vars := mux.Vars(r)
@@ -221,6 +220,8 @@ func deletePostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	box = packr.NewBox("../../templates")
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", indexHandler)
@@ -235,4 +236,25 @@ func main() {
 
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func loadTemplate(box *packr.Box, file string) *template.Template {
+	layoutHTML, err := box.FindString("layout.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	layoutTmpl := template.New("layout")
+	layoutTmpl, err = layoutTmpl.Parse(layoutHTML)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	html, err := box.FindString(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	layoutTmpl.Parse(html)
+
+	return layoutTmpl
 }
