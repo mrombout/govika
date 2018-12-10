@@ -8,10 +8,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"fmt"
 
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 	"gopkg.in/yaml.v2"
+	"gopkg.in/russross/blackfriday.v2"
 )
 
 type Comment struct {
@@ -246,6 +248,9 @@ func loadTemplate(box *packr.Box, file string) *template.Template {
 
 	layoutTmpl := template.New("layout")
 	layoutTmpl, err = layoutTmpl.Parse(layoutHTML)
+	layoutTmpl.Funcs(template.FuncMap{
+		"markdown": markdown,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -257,4 +262,9 @@ func loadTemplate(box *packr.Box, file string) *template.Template {
 	layoutTmpl.Parse(html)
 
 	return layoutTmpl
+}
+
+func markdown(args ...interface{}) template.HTML {
+	s := blackfriday.Run([]byte(fmt.Sprintf("%s", args...)))
+	return template.HTML(s)
 }

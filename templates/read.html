@@ -4,14 +4,14 @@
 <a href="/" class="btn">Back</a> <a href="/update/{{.Issue.Id}}/" class="btn">Edit</a> <a href="/delete/{{.Issue.Id}}/" class="btn btn-danger">Delete</a>
 
 <h1>{{.Issue.Title}}</h1>
-<p>{{.Issue.Description}}</p>
+<p>{{.Issue.Description | markdown}}</p>
 
 <hr />
 <h2>Comments</h2>
 <table style="width: 90%;">
 {{range .Issue.Comments}}
     <tr>
-        <td>{{.Message}}</td>
+        <td>{{.Message | markdown}}</td>
     </tr>
     <tr>
         <td>~ {{if .Author}}{{.Author}}{{else}}Anonymous{{end}}</td>
