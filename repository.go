@@ -1,4 +1,4 @@
-package govika
+package vika
 
 import (
 	"io/ioutil"

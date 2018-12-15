@@ -8,31 +8,31 @@ import (
 
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
-	"github.com/mrombout/govika"
+	"github.com/mrombout/vika"
 	blackfriday "gopkg.in/russross/blackfriday.v2"
 )
 
 type IndexViewModel struct {
-	Issues []govika.Issue
+	Issues []vika.Issue
 }
 
 type CreateViewModel struct {
 }
 
 type ReadViewModel struct {
-	Issue govika.Issue
+	Issue vika.Issue
 }
 
 type UpdateViewModel struct {
-	Issue govika.Issue
+	Issue vika.Issue
 }
 
 type DeleteViewModel struct {
-	Issue govika.Issue
+	Issue vika.Issue
 }
 
 var box packr.Box
-var repository govika.IssuesRepository
+var repository vika.IssuesRepository
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := loadTemplate(&box, "index.html")
@@ -58,8 +58,8 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPostHandler(w http.ResponseWriter, r *http.Request) {
-	issue := govika.Issue{
-		ID:          govika.ID(r.FormValue("id")),
+	issue := vika.Issue{
+		ID:          vika.ID(r.FormValue("id")),
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),
 	}
@@ -77,7 +77,7 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	viewModel := ReadViewModel{}
 
 	vars := mux.Vars(r)
-	id := govika.ID(vars["id"])
+	id := vika.ID(vars["id"])
 
 	issue, err := repository.GetIssue(id)
 	if err != nil {
@@ -92,13 +92,13 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 func commentPostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	id := govika.ID(vars["id"])
+	id := vika.ID(vars["id"])
 	issue, err := repository.GetIssue(id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	comment := govika.Comment{
+	comment := vika.Comment{
 		Message: r.FormValue("message"),
 	}
 	issue.Comments = append(issue.Comments, comment)
@@ -114,7 +114,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
-	id := govika.ID(vars["id"])
+	id := vika.ID(vars["id"])
 	issue, err := repository.GetIssue(id)
 	if err != nil {
 		log.Fatal(err)
@@ -127,14 +127,14 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 func updatePostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := govika.ID(vars["id"])
+	id := vika.ID(vars["id"])
 
 	issue, err := repository.GetIssue(id)
 	if err != nil {
 		log.Fatal(issue)
 	}
 
-	issue.ID = govika.ID(r.FormValue("id"))
+	issue.ID = vika.ID(r.FormValue("id"))
 	issue.Title = r.FormValue("title")
 	issue.Description = r.FormValue("description")
 
@@ -148,7 +148,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	viewModel := DeleteViewModel{}
 
 	vars := mux.Vars(r)
-	id := govika.ID(vars["id"])
+	id := vika.ID(vars["id"])
 	issue, err := repository.GetIssue(id)
 	if err != nil {
 		log.Fatal(err)
@@ -161,7 +161,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 
 func deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := govika.ID(vars["id"])
+	id := vika.ID(vars["id"])
 
 	repository.DeleteIssue(id)
 
@@ -170,7 +170,7 @@ func deletePostHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	box = packr.NewBox("../../templates")
-	repository = govika.FilesystemIssuesRepository{}
+	repository = vika.FilesystemIssuesRepository{}
 
 	r := mux.NewRouter()
 
