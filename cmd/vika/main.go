@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -8,12 +9,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"fmt"
 
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
-	"gopkg.in/yaml.v2"
-	"gopkg.in/russross/blackfriday.v2"
+	blackfriday "gopkg.in/russross/blackfriday.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type Comment struct {
@@ -58,13 +58,13 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := loadTemplate(&box, "index.html")
 	viewModel := IndexViewModel{}
 
-	files, err := ioutil.ReadDir("./issues")
+	files, err := ioutil.ReadDir("./.issues")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for _, file := range files {
-		data, err := ioutil.ReadFile("./issues/" + file.Name())
+		data, err := ioutil.ReadFile("./.issues/" + file.Name())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -95,7 +95,7 @@ func createPostHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ioutil.WriteFile("./issues/"+issue.Id+".yml", d, 0644)
+	ioutil.WriteFile("./.issues/"+issue.Id+".yml", d, 0644)
 
 	http.Redirect(w, r, "/read/"+issue.Id+"/", 303)
 }
@@ -107,7 +107,7 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	fileName := vars["id"] + ".yml"
-	filePath := "./issues/" + fileName
+	filePath := "./.issues/" + fileName
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Fatal(err)
@@ -126,7 +126,7 @@ func commentPostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	fileName := vars["id"] + ".yml"
-	filePath := "./issues/" + fileName
+	filePath := "./.issues/" + fileName
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Fatal(err)
@@ -155,7 +155,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	fileName := vars["id"] + ".yml"
-	filePath := "./issues/" + fileName
+	filePath := "./.issues/" + fileName
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Fatal(err)
@@ -180,7 +180,7 @@ func updatePostHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ioutil.WriteFile("./issues/"+issue.Id+".yml", d, 0644)
+	ioutil.WriteFile("./.issues/"+issue.Id+".yml", d, 0644)
 
 	http.Redirect(w, r, "/read/"+issue.Id+"/", 303)
 }
@@ -192,7 +192,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	fileName := vars["id"] + ".yml"
-	filePath := "./issues/" + fileName
+	filePath := "./.issues/" + fileName
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		log.Fatal(err)
@@ -211,7 +211,7 @@ func deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	fileName := vars["id"] + ".yml"
-	filePath := "./issues/" + fileName
+	filePath := "./.issues/" + fileName
 
 	err := os.Remove(filePath)
 	if err != nil {
