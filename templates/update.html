@@ -4,12 +4,12 @@
 <h1>Update issue</h1>
 
 <form method="POST">
-    <a href="/read/{{.Issue.Id}}/" class="btn">Back</a>
+    <a href="/read/{{.Issue.ID}}/" class="btn">Back</a>
     <table>
         <tbody>
             <tr>
                 <th><label for="id">Id</label></th>
-                <td><input type="text" id="id" name="id" value="{{.Issue.Id}}" /></td>
+                <td><input type="text" id="id" name="id" value="{{.Issue.ID}}" /></td>
             </tr>
             <tr>
                 <th><label for="title">Title</label></th>
@@ -21,7 +21,7 @@
             </tr>
         </tbody>
     </table>
-    <input type="submit" value="Create" class="btn btn-primary" /> or <a href="/read/{{.Issue.Id}}/">Cancel</a>
+    <input type="submit" value="Create" class="btn btn-primary" /> or <a href="/read/{{.Issue.ID}}/">Cancel</a>
 </form>
 </div>
 

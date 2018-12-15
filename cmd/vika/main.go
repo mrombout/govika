@@ -3,80 +3,52 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
+	"github.com/mrombout/govika"
 	blackfriday "gopkg.in/russross/blackfriday.v2"
-	yaml "gopkg.in/yaml.v2"
 )
 
-type Comment struct {
-	Author  string
-	Message string
-}
-
-type Label string
-
-type Issue struct {
-	Id          string
-	Title       string
-	Description string
-	Author      string
-	Milestone   string
-	Comments    []Comment
-	Labels      []Label
-}
-
 type IndexViewModel struct {
-	Issues []Issue
+	Issues []govika.Issue
 }
 
 type CreateViewModel struct {
 }
 
 type ReadViewModel struct {
-	Issue Issue
+	Issue govika.Issue
 }
 
 type UpdateViewModel struct {
-	Issue Issue
+	Issue govika.Issue
 }
 
 type DeleteViewModel struct {
-	Issue Issue
+	Issue govika.Issue
 }
 
 var box packr.Box
+var repository govika.IssuesRepository
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := loadTemplate(&box, "index.html")
 	viewModel := IndexViewModel{}
 
-	files, err := ioutil.ReadDir("./.issues")
+	issues, err := repository.GetIssues()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, file := range files {
-		data, err := ioutil.ReadFile("./.issues/" + file.Name())
-		if err != nil {
-			log.Fatal(err)
-		}
+	viewModel.Issues = issues
 
-		issue := Issue{
-			Id: strings.TrimSuffix(file.Name(), filepath.Ext(file.Name())),
-		}
-		err = yaml.Unmarshal([]byte(data), &issue)
-		viewModel.Issues = append(viewModel.Issues, issue)
+	err = tmpl.ExecuteTemplate(w, "layout", viewModel)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	tmpl.ExecuteTemplate(w, "layout", viewModel)
 }
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
@@ -86,18 +58,18 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPostHandler(w http.ResponseWriter, r *http.Request) {
-	issue := Issue{
-		Id:          r.FormValue("id"),
+	issue := govika.Issue{
+		ID:          govika.ID(r.FormValue("id")),
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),
 	}
-	d, err := yaml.Marshal(&issue)
+
+	err := repository.SaveIssue(&issue)
 	if err != nil {
 		log.Fatal(err)
 	}
-	ioutil.WriteFile("./.issues/"+issue.Id+".yml", d, 0644)
 
-	http.Redirect(w, r, "/read/"+issue.Id+"/", 303)
+	http.Redirect(w, r, "/read/"+string(issue.ID)+"/", 303)
 }
 
 func readHandler(w http.ResponseWriter, r *http.Request) {
@@ -105,18 +77,13 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	viewModel := ReadViewModel{}
 
 	vars := mux.Vars(r)
+	id := govika.ID(vars["id"])
 
-	fileName := vars["id"] + ".yml"
-	filePath := "./.issues/" + fileName
-	data, err := ioutil.ReadFile(filePath)
+	issue, err := repository.GetIssue(id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	issue := Issue{
-		Id: strings.TrimSuffix(fileName, filepath.Ext(fileName)),
-	}
-	err = yaml.Unmarshal([]byte(data), &issue)
 	viewModel.Issue = issue
 
 	tmpl.ExecuteTemplate(w, "layout", viewModel)
@@ -125,27 +92,20 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 func commentPostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	fileName := vars["id"] + ".yml"
-	filePath := "./.issues/" + fileName
-	data, err := ioutil.ReadFile(filePath)
+	id := govika.ID(vars["id"])
+	issue, err := repository.GetIssue(id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	issue := Issue{
-		Id: strings.TrimSuffix(fileName, filepath.Ext(fileName)),
-	}
-	err = yaml.Unmarshal([]byte(data), &issue)
-
-	comment := Comment{
+	comment := govika.Comment{
 		Message: r.FormValue("message"),
 	}
 	issue.Comments = append(issue.Comments, comment)
 
-	d, err := yaml.Marshal(&issue)
-	ioutil.WriteFile(filePath, d, 0644)
+	repository.SaveIssue(&issue)
 
-	http.Redirect(w, r, "/read/"+issue.Id+"/", 303)
+	http.Redirect(w, r, "/read/"+string(issue.ID)+"/", 303)
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
@@ -154,35 +114,33 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
-	fileName := vars["id"] + ".yml"
-	filePath := "./.issues/" + fileName
-	data, err := ioutil.ReadFile(filePath)
+	id := govika.ID(vars["id"])
+	issue, err := repository.GetIssue(id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	issue := Issue{
-		Id: strings.TrimSuffix(fileName, filepath.Ext(fileName)),
-	}
-	err = yaml.Unmarshal([]byte(data), &issue)
 	viewModel.Issue = issue
 
 	tmpl.ExecuteTemplate(w, "layout", viewModel)
 }
 
 func updatePostHandler(w http.ResponseWriter, r *http.Request) {
-	issue := Issue{
-		Id:          r.FormValue("id"),
-		Title:       r.FormValue("title"),
-		Description: r.FormValue("description"),
-	}
-	d, err := yaml.Marshal(&issue)
-	if err != nil {
-		log.Fatal(err)
-	}
-	ioutil.WriteFile("./.issues/"+issue.Id+".yml", d, 0644)
+	vars := mux.Vars(r)
+	id := govika.ID(vars["id"])
 
-	http.Redirect(w, r, "/read/"+issue.Id+"/", 303)
+	issue, err := repository.GetIssue(id)
+	if err != nil {
+		log.Fatal(issue)
+	}
+
+	issue.ID = govika.ID(r.FormValue("id"))
+	issue.Title = r.FormValue("title")
+	issue.Description = r.FormValue("description")
+
+	repository.SaveIssue(&issue)
+
+	http.Redirect(w, r, "/read/"+string(issue.ID)+"/", 303)
 }
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -190,18 +148,12 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	viewModel := DeleteViewModel{}
 
 	vars := mux.Vars(r)
-
-	fileName := vars["id"] + ".yml"
-	filePath := "./.issues/" + fileName
-	data, err := ioutil.ReadFile(filePath)
+	id := govika.ID(vars["id"])
+	issue, err := repository.GetIssue(id)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	issue := Issue{
-		Id: strings.TrimSuffix(fileName, filepath.Ext(fileName)),
-	}
-	err = yaml.Unmarshal([]byte(data), &issue)
 	viewModel.Issue = issue
 
 	tmpl.ExecuteTemplate(w, "layout", viewModel)
@@ -209,20 +161,16 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 
 func deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	id := govika.ID(vars["id"])
 
-	fileName := vars["id"] + ".yml"
-	filePath := "./.issues/" + fileName
-
-	err := os.Remove(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	repository.DeleteIssue(id)
 
 	http.Redirect(w, r, "/", 303)
 }
 
 func main() {
 	box = packr.NewBox("../../templates")
+	repository = govika.FilesystemIssuesRepository{}
 
 	r := mux.NewRouter()
 

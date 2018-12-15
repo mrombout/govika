@@ -1,7 +1,7 @@
 {{define "content"}}
 
 <div class="read-issue">
-<a href="/" class="btn">Back</a> <a href="/update/{{.Issue.Id}}/" class="btn">Edit</a> <a href="/delete/{{.Issue.Id}}/" class="btn btn-danger">Delete</a>
+<a href="/" class="btn">Back</a> <a href="/update/{{.Issue.ID}}/" class="btn">Edit</a> <a href="/delete/{{.Issue.ID}}/" class="btn btn-danger">Delete</a>
 
 <h1>{{.Issue.Title}}</h1>
 <p>{{.Issue.Description | markdown}}</p>
@@ -24,7 +24,7 @@
 
 <hr />
 
-<form method="POST" action="/read/{{.Issue.Id}}/comment/">
+<form method="POST" action="/read/{{.Issue.ID}}/comment/">
     <table>
         <tr>
             <th><label for="author">Author</label></th>
