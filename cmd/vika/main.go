@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/spf13/afero"
+
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 	"github.com/mrombout/vika"
@@ -170,7 +172,11 @@ func deletePostHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	box = packr.NewBox("../../templates")
-	repository = vika.FilesystemIssuesRepository{}
+	repository = vika.FilesystemIssuesRepository{
+		Fs: vika.AferoFilesystem{
+			Fs: afero.NewOsFs(),
+		},
+	}
 
 	r := mux.NewRouter()
 
