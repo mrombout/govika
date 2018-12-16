@@ -14,22 +14,22 @@ import (
 	blackfriday "gopkg.in/russross/blackfriday.v2"
 )
 
-type IndexViewModel struct {
+type indexViewModel struct {
 	Issues []vika.Issue
 }
 
-type CreateViewModel struct {
+type createViewModel struct {
 }
 
-type ReadViewModel struct {
+type readViewModel struct {
 	Issue vika.Issue
 }
 
-type UpdateViewModel struct {
+type updateViewModel struct {
 	Issue vika.Issue
 }
 
-type DeleteViewModel struct {
+type deleteViewModel struct {
 	Issue vika.Issue
 }
 
@@ -38,7 +38,7 @@ var repository vika.IssuesRepository
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := loadTemplate(&box, "index.html")
-	viewModel := IndexViewModel{}
+	viewModel := indexViewModel{}
 
 	issues, err := repository.GetIssues()
 	if err != nil {
@@ -55,7 +55,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := loadTemplate(&box, "create.html")
-	viewModel := CreateViewModel{}
+	viewModel := createViewModel{}
 	tmpl.ExecuteTemplate(w, "layout", viewModel)
 }
 
@@ -76,7 +76,7 @@ func createPostHandler(w http.ResponseWriter, r *http.Request) {
 
 func readHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := loadTemplate(&box, "read.html")
-	viewModel := ReadViewModel{}
+	viewModel := readViewModel{}
 
 	vars := mux.Vars(r)
 	id := vika.ID(vars["id"])
@@ -112,7 +112,7 @@ func commentPostHandler(w http.ResponseWriter, r *http.Request) {
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := loadTemplate(&box, "update.html")
-	viewModel := UpdateViewModel{}
+	viewModel := updateViewModel{}
 
 	vars := mux.Vars(r)
 
@@ -147,7 +147,7 @@ func updatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := loadTemplate(&box, "delete.html")
-	viewModel := DeleteViewModel{}
+	viewModel := deleteViewModel{}
 
 	vars := mux.Vars(r)
 	id := vika.ID(vars["id"])
