@@ -15,7 +15,7 @@ type ID string
 // Issue represents something that needs to be done or discussed in a project (e.g. a bug, a task, an issue, a feature
 // request, etc)
 type Issue struct {
-	ID          ID
+	ID          ID `-`
 	Title       string
 	Description string
 	Author      string

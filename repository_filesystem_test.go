@@ -131,6 +131,28 @@ func TestSaveIssueWhenIDISNotSetThenItReturnsAnError(t *testing.T) {
 	assert.EqualError(t, err, "issue ID is empty")
 }
 
+func TestSaveIssueIDIsNotSavedToFile(t *testing.T) {
+	// arrange
+	repository, inMemFs := newInMemFilesystemIssuesRepository()
+
+	issueID := "test-issue"
+	issue := Issue{
+		ID: ID(issueID),
+	}
+	issueFilepath := fmt.Sprintf(".issues/%s.yml", issueID)
+
+	// act
+	err := repository.SaveIssue(&issue)
+
+	// assert
+	assert.NoError(t, err)
+	assertFileExists(t, inMemFs, issueFilepath)
+
+	fileContent, err := afero.ReadFile(inMemFs, issueFilepath)
+	assert.NoError(t, err)
+	assert.NotContains(t, string(fileContent), "id: test-issue")
+}
+
 func TestSaveIssueWhenCantWriteFileThenItReturnsAnError(t *testing.T) {
 	// arrange
 	expectedErr := errors.New("expected write error")
