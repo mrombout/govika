@@ -101,6 +101,7 @@ func commentPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	comment := vika.Comment{
+		Author:  r.FormValue("author"),
 		Message: r.FormValue("message"),
 	}
 	issue.Comments = append(issue.Comments, comment)
