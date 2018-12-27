@@ -9,11 +9,11 @@
         <tbody>
             <tr>
                 <th><label for="id">Id</label></th>
-                <td><input type="text" id="id" name="id" value="{{.Issue.ID}}" /></td>
+                <td><input type="text" id="id" name="id" value="{{.Issue.ID}}" readonly /></td>
             </tr>
             <tr>
                 <th><label for="title">Title</label></th>
-                <td><input type="text" id="title" name="title" value="{{.Issue.Title}}" /></td>
+                <td><input type="text" id="title" name="title" value="{{.Issue.Title}}" required /></td>
             </tr>
             <tr>
                 <th><label for="description">Description</label></th>
