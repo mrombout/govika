@@ -1,6 +1,7 @@
 package vika
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -42,10 +43,26 @@ func (r FilesystemIssuesRepository) GetIssues() ([]Issue, error) {
 	return issues, nil
 }
 
+// normalizeNewlines replaces all possible newlines to unix style newlines.
+func normalizeNewlines(d []byte) []byte {
+	// replace CR LF \r\n (windows) with LF \n (unix)
+	d = bytes.Replace(d, []byte{13, 10}, []byte{10}, -1)
+	// replace CF \r (mac) with LF \n (unix)
+	d = bytes.Replace(d, []byte{13}, []byte{10}, -1)
+	return d
+}
+
 // SaveIssue saves an issue to the `./.issues` folder. The existing issue will be overwritten.
 func (r FilesystemIssuesRepository) SaveIssue(issue *Issue) error {
 	if issue.ID == "" {
 		return errors.New("issue ID is empty")
+	}
+
+	// issue.Description and comments are normalized to unix newlines to force literal style marshalling in json, see https://github.com/go-yaml/yaml/issues/197
+	issue.Description = string(normalizeNewlines([]byte(issue.Description)))
+	for key, comment := range issue.Comments {
+		comment.Message = string(normalizeNewlines([]byte(comment.Message)))
+		issue.Comments[key] = comment
 	}
 
 	data, err := yaml.Marshal(&issue)
