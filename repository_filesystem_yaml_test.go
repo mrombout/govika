@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetIssuesWhenNoIssuesInFolderThenReturnsEmptyArray(t *testing.T) {
+func TestYamlGetIssuesWhenNoIssuesInFolderThenReturnsEmptyArray(t *testing.T) {
 	// arrange
-	repository, inMemFs := newInMemFilesystemIssuesRepository()
+	repository, inMemFs := newInMemFilesystemYamlIssuesRepository()
 	inMemFs.Mkdir(".issues", 0644)
 
 	// act
@@ -23,9 +23,9 @@ func TestGetIssuesWhenNoIssuesInFolderThenReturnsEmptyArray(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestGetIssuesWhenNoIssuesFolderThenReturnsError(t *testing.T) {
+func TestYamlGetIssuesWhenNoIssuesFolderThenReturnsError(t *testing.T) {
 	// arrange
-	repository, _ := newInMemFilesystemIssuesRepository()
+	repository, _ := newInMemFilesystemYamlIssuesRepository()
 
 	// act
 	issues, err := repository.GetIssues()
@@ -37,9 +37,9 @@ func TestGetIssuesWhenNoIssuesFolderThenReturnsError(t *testing.T) {
 	}
 }
 
-func TestGetIssuesWhenMultipleIssuesFolderReturnsArrayWithAllIssues(t *testing.T) {
+func TestYamlGetIssuesWhenMultipleIssuesFolderReturnsArrayWithAllIssues(t *testing.T) {
 	// arrange
-	repository, inMemFs := newInMemFilesystemIssuesRepository()
+	repository, inMemFs := newInMemFilesystemYamlIssuesRepository()
 
 	firstIssueTitle := "Issue 1"
 	firstIssueData := fmt.Sprintf(`id: issue1
@@ -64,10 +64,10 @@ author: Test`, secondIssueTitle)
 	assert.NoError(t, err)
 }
 
-func TestGetIssuesWhenCantReadFileThenItReturnsAnError(t *testing.T) {
+func TestYamlGetIssuesWhenCantReadFileThenItReturnsAnError(t *testing.T) {
 	// arrange
 	expectedErr := errors.New("expected read error")
-	repository := FilesystemIssuesRepository{
+	repository := FilesystemYamlIssuesRepository{
 		Fs: mockFilesystem{
 			readFileReturnError: expectedErr,
 			readDirReturnFileInfo: []os.FileInfo{
@@ -84,9 +84,9 @@ func TestGetIssuesWhenCantReadFileThenItReturnsAnError(t *testing.T) {
 	assert.EqualError(t, err, expectedErr.Error())
 }
 
-func TestGetIssuesWhenUnableToUnmarshalThenItReturnsAnError(t *testing.T) {
+func TestYamlGetIssuesWhenUnableToUnmarshalThenItReturnsAnError(t *testing.T) {
 	// arrange
-	repository, inMemFs := newInMemFilesystemIssuesRepository()
+	repository, inMemFs := newInMemFilesystemYamlIssuesRepository()
 
 	issueData := `invalid yaml`
 	afero.WriteFile(inMemFs, ".issues/issue1.yml", []byte(issueData), 0644)
@@ -99,9 +99,9 @@ func TestGetIssuesWhenUnableToUnmarshalThenItReturnsAnError(t *testing.T) {
 	assert.Contains(t, err.Error(), "yaml: unmarshal errors:")
 }
 
-func TestSaveIssueWhenIDIsSetThenItSavesIssueToAFile(t *testing.T) {
+func TestYamlSaveIssueWhenIDIsSetThenItSavesIssueToAFile(t *testing.T) {
 	// arrange
-	repository, inMemFs := newInMemFilesystemIssuesRepository()
+	repository, inMemFs := newInMemFilesystemYamlIssuesRepository()
 
 	issueID := "test-issue"
 	issue := Issue{
@@ -117,9 +117,9 @@ func TestSaveIssueWhenIDIsSetThenItSavesIssueToAFile(t *testing.T) {
 	assertFileExists(t, inMemFs, issueFilepath)
 }
 
-func TestSaveIssueWhenIDISNotSetThenItReturnsAnError(t *testing.T) {
+func TestYamlSaveIssueWhenIDISNotSetThenItReturnsAnError(t *testing.T) {
 	// arrange
-	repository, _ := newInMemFilesystemIssuesRepository()
+	repository, _ := newInMemFilesystemYamlIssuesRepository()
 
 	issue := Issue{}
 
@@ -131,9 +131,9 @@ func TestSaveIssueWhenIDISNotSetThenItReturnsAnError(t *testing.T) {
 	assert.EqualError(t, err, "issue ID is empty")
 }
 
-func TestSaveIssueIDIsNotSavedToFile(t *testing.T) {
+func TestYamlSaveIssueIDIsNotSavedToFile(t *testing.T) {
 	// arrange
-	repository, inMemFs := newInMemFilesystemIssuesRepository()
+	repository, inMemFs := newInMemFilesystemYamlIssuesRepository()
 
 	issueID := "test-issue"
 	issue := Issue{
@@ -153,10 +153,10 @@ func TestSaveIssueIDIsNotSavedToFile(t *testing.T) {
 	assert.NotContains(t, string(fileContent), "id: test-issue")
 }
 
-func TestSaveIssueWhenCantWriteFileThenItReturnsAnError(t *testing.T) {
+func TestYamlSaveIssueWhenCantWriteFileThenItReturnsAnError(t *testing.T) {
 	// arrange
 	expectedErr := errors.New("expected write error")
-	repository := FilesystemIssuesRepository{
+	repository := FilesystemYamlIssuesRepository{
 		Fs: mockFilesystem{
 			writeFileReturnError: expectedErr,
 		},
@@ -174,9 +174,9 @@ func TestSaveIssueWhenCantWriteFileThenItReturnsAnError(t *testing.T) {
 	assert.EqualError(t, err, expectedErr.Error())
 }
 
-func TestGetIssueWhenIssueExistsThenItReturnsThatIssue(t *testing.T) {
+func TestYamlGetIssueWhenIssueExistsThenItReturnsThatIssue(t *testing.T) {
 	// arrange
-	repository, inMemFs := newInMemFilesystemIssuesRepository()
+	repository, inMemFs := newInMemFilesystemYamlIssuesRepository()
 
 	issueID := "issue1"
 	issueTitle := "Issue 1"
@@ -195,9 +195,9 @@ author: Test`, issueID, issueTitle)
 	assert.Equal(t, issueTitle, issue.Title)
 }
 
-func TestGetIssueWhenIssueDoesNotExistsThenItReturnsAnError(t *testing.T) {
+func TestYamlGetIssueWhenIssueDoesNotExistsThenItReturnsAnError(t *testing.T) {
 	// arrange
-	repository, _ := newInMemFilesystemIssuesRepository()
+	repository, _ := newInMemFilesystemYamlIssuesRepository()
 
 	issueID := "issue1"
 
@@ -209,10 +209,10 @@ func TestGetIssueWhenIssueDoesNotExistsThenItReturnsAnError(t *testing.T) {
 	assert.EqualError(t, err, fmt.Sprintf("issue '%s' does not exist", issueID))
 }
 
-func TestGetIssueWhenIssueCantBeReadThenItReturnsAnError(t *testing.T) {
+func TestYamlGetIssueWhenIssueCantBeReadThenItReturnsAnError(t *testing.T) {
 	// arrange
 	expectedErr := errors.New("expected read error")
-	repository := FilesystemIssuesRepository{
+	repository := FilesystemYamlIssuesRepository{
 		Fs: mockFilesystem{
 			readFileReturnError: expectedErr,
 		},
@@ -226,9 +226,9 @@ func TestGetIssueWhenIssueCantBeReadThenItReturnsAnError(t *testing.T) {
 	assert.EqualError(t, err, expectedErr.Error())
 }
 
-func TestGetIssueWhenUnableToUnmarshalThenItReturnsAnError(t *testing.T) {
+func TestYamlGetIssueWhenUnableToUnmarshalThenItReturnsAnError(t *testing.T) {
 	// arrange
-	repository, inMemFs := newInMemFilesystemIssuesRepository()
+	repository, inMemFs := newInMemFilesystemYamlIssuesRepository()
 
 	issueID := "issue1"
 	issueData := `invalid yaml`
@@ -242,9 +242,9 @@ func TestGetIssueWhenUnableToUnmarshalThenItReturnsAnError(t *testing.T) {
 	assert.Contains(t, err.Error(), "yaml: unmarshal errors:")
 }
 
-func TestDeleteIssueWhenIssueExistsThenItRemovesThatIssue(t *testing.T) {
+func TestYamlDeleteIssueWhenIssueExistsThenItRemovesThatIssue(t *testing.T) {
 	// arrange
-	repository, inMemFs := newInMemFilesystemIssuesRepository()
+	repository, inMemFs := newInMemFilesystemYamlIssuesRepository()
 
 	issueID := "issue1"
 	issueData := fmt.Sprintf(`id: %s
@@ -262,10 +262,10 @@ func TestDeleteIssueWhenIssueExistsThenItRemovesThatIssue(t *testing.T) {
 	assertFileNotExists(t, inMemFs, issueFilepath)
 }
 
-func TestDeleteIssueWhenIssueCantBeRemovedThenItReturnsAnError(t *testing.T) {
+func TestYamlDeleteIssueWhenIssueCantBeRemovedThenItReturnsAnError(t *testing.T) {
 	// arrange
 	expectedErr := errors.New("expected remove error")
-	repository := FilesystemIssuesRepository{
+	repository := FilesystemYamlIssuesRepository{
 		Fs: mockFilesystem{
 			removeReturnError: expectedErr,
 		},
@@ -279,28 +279,13 @@ func TestDeleteIssueWhenIssueCantBeRemovedThenItReturnsAnError(t *testing.T) {
 	assert.EqualError(t, err, expectedErr.Error())
 }
 
-func newInMemFilesystemIssuesRepository() (FilesystemIssuesRepository, afero.Fs) {
+func newInMemFilesystemYamlIssuesRepository() (FilesystemYamlIssuesRepository, afero.Fs) {
 	inMemFs := afero.NewMemMapFs()
-	repository := FilesystemIssuesRepository{
+	repository := FilesystemYamlIssuesRepository{
 		Fs: AferoFilesystem{
 			Fs: inMemFs,
 		},
 	}
 
 	return repository, inMemFs
-}
-
-func assertFileExists(t *testing.T, fs afero.Fs, filepath string) {
-	t.Helper()
-
-	_, err := fs.Stat(filepath)
-	assert.NoError(t, err)
-}
-
-func assertFileNotExists(t *testing.T, fs afero.Fs, filepath string) {
-	t.Helper()
-
-	_, err := fs.Stat(filepath)
-	assert.Error(t, err)
-	assert.True(t, os.IsNotExist(err))
 }

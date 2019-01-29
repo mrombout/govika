@@ -1,5 +1,7 @@
 package vika
 
+import "bytes"
+
 // Comment represents a comment on an issue.
 type Comment struct {
 	Author  string
@@ -30,4 +32,13 @@ type IssuesRepository interface {
 	SaveIssue(issue *Issue) error
 	GetIssue(ID ID) (Issue, error)
 	DeleteIssue(ID ID) error
+}
+
+// normalizeNewlines replaces all possible newlines to unix style newlines.
+func normalizeNewlines(d []byte) []byte {
+	// replace CR LF \r\n (windows) with LF \n (unix)
+	d = bytes.Replace(d, []byte{13, 10}, []byte{10}, -1)
+	// replace CF \r (mac) with LF \n (unix)
+	d = bytes.Replace(d, []byte{13}, []byte{10}, -1)
+	return d
 }

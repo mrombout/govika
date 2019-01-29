@@ -173,7 +173,7 @@ func deletePostHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	box = packr.NewBox("../../templates")
-	repository = vika.FilesystemIssuesRepository{
+	repository = vika.FilesystemYamlIssuesRepository{
 		Fs: vika.AferoFilesystem{
 			Fs: afero.NewOsFs(),
 		},

@@ -1,7 +1,6 @@
 package vika
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -11,13 +10,13 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// FilesystemIssuesRepository stores, retrieves and otherwise manipulates issues on the filesystem.
-type FilesystemIssuesRepository struct {
+// FilesystemYamlIssuesRepository stores, retrieves and otherwise manipulates issues on the filesystem.
+type FilesystemYamlIssuesRepository struct {
 	Fs Filesystem
 }
 
 // GetIssues retrieves all files from the `./.issues` folder and treats them as YAML issue definitions.
-func (r FilesystemIssuesRepository) GetIssues() ([]Issue, error) {
+func (r FilesystemYamlIssuesRepository) GetIssues() ([]Issue, error) {
 	files, err := r.Fs.ReadDir("./.issues")
 	if err != nil {
 		return nil, err
@@ -43,17 +42,8 @@ func (r FilesystemIssuesRepository) GetIssues() ([]Issue, error) {
 	return issues, nil
 }
 
-// normalizeNewlines replaces all possible newlines to unix style newlines.
-func normalizeNewlines(d []byte) []byte {
-	// replace CR LF \r\n (windows) with LF \n (unix)
-	d = bytes.Replace(d, []byte{13, 10}, []byte{10}, -1)
-	// replace CF \r (mac) with LF \n (unix)
-	d = bytes.Replace(d, []byte{13}, []byte{10}, -1)
-	return d
-}
-
 // SaveIssue saves an issue to the `./.issues` folder. The existing issue will be overwritten.
-func (r FilesystemIssuesRepository) SaveIssue(issue *Issue) error {
+func (r FilesystemYamlIssuesRepository) SaveIssue(issue *Issue) error {
 	if issue.ID == "" {
 		return errors.New("issue ID is empty")
 	}
@@ -79,7 +69,7 @@ func (r FilesystemIssuesRepository) SaveIssue(issue *Issue) error {
 }
 
 // GetIssue finds and returns an issue from the filesystem matching the given ID.
-func (r FilesystemIssuesRepository) GetIssue(issueID ID) (Issue, error) {
+func (r FilesystemYamlIssuesRepository) GetIssue(issueID ID) (Issue, error) {
 	fileName := string(issueID) + ".yml"
 	issue := Issue{
 		ID: ID(strings.TrimSuffix(fileName, filepath.Ext(fileName))),
@@ -103,7 +93,7 @@ func (r FilesystemIssuesRepository) GetIssue(issueID ID) (Issue, error) {
 }
 
 // DeleteIssue deletes an issue from the filesystem matching the given ID.
-func (r FilesystemIssuesRepository) DeleteIssue(issueID ID) error {
+func (r FilesystemYamlIssuesRepository) DeleteIssue(issueID ID) error {
 	fileName := string(issueID) + ".yml"
 	filePath := "./.issues/" + fileName
 
