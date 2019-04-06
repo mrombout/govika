@@ -25,6 +25,9 @@ type header1Title struct {
 type emptyLine struct {
 }
 
+type commentHeader struct {
+}
+
 type commentContent struct {
 	Content string
 }
@@ -56,6 +59,8 @@ func lex(scanner Scanner) ([]token, error) {
 		switch {
 		case isPreambleDelimiter(line):
 			currentToken = lexPreambleDelimiter(line)
+		case isCommentsHeader(line):
+			currentToken = lexCommentHeader(line)
 		case isHeader1Title(line):
 			currentToken = lexHeader1Title(line)
 		case isEmptyLine(line):
@@ -104,6 +109,14 @@ func isEmptyLine(line string) bool {
 
 func lexEmptyLine(line string) emptyLine {
 	return emptyLine{}
+}
+
+func isCommentsHeader(line string) bool {
+	return line == "# Comments"
+}
+
+func lexCommentHeader(line string) commentHeader {
+	return commentHeader{}
 }
 
 func isCommentContent(line string) bool {

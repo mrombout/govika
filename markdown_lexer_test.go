@@ -18,6 +18,7 @@ func TestLexTokensIndividually(t *testing.T) {
 		{"---", []token{preambleDelimiter{}}},
 		{"# Issue title", []token{header1Title{Content: "Issue title"}}},
 		{"\r\n", []token{emptyLine{}}},
+		{"# Comments", []token{commentHeader{}}},
 		{"> Lorum ipsum", []token{commentContent{Content: "Lorum ipsum"}}},
 		{"~ Jane Doe", []token{commentAuthor{Author: "Jane Doe"}}},
 		{"key: value", []token{unknownContent{Content: "key: value"}}},
@@ -166,6 +167,41 @@ func TestLexEmptyLineValid(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// act
 			result := lexEmptyLine(tc.validInput)
+
+			// assert
+			assert.Equal(t, tc.expectedToken, result)
+		})
+	}
+}
+
+func TestIsCommentHeaderValid(t *testing.T) {
+	testCases := []struct {
+		name       string
+		validInput string
+	}{{"plain", `# Comments`}}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// act
+			result := isCommentsHeader(tc.validInput)
+
+			// assert
+			assert.True(t, result)
+		})
+	}
+}
+
+func TestLexCommentHeaderValid(t *testing.T) {
+	testCases := []struct {
+		name          string
+		validInput    string
+		expectedToken commentHeader
+	}{{"plain", `# Comments`, commentHeader{}}}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// act
+			result := lexCommentHeader(tc.validInput)
 
 			// assert
 			assert.Equal(t, tc.expectedToken, result)
